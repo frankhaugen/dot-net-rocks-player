@@ -7,10 +7,48 @@
         mc:Ignorable="d"
         Title="MainWindow" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
 	<StackPanel>
+		<GroupBox Header="Player">
+			<StackPanel>
+				<Label HorizontalAlignment="Stretch" Content="!Name of song!" />
+				<ProgressBar Name="SongProgress" HorizontalAlignment="Stretch" Height="7" Minimum="0" Maximum="10000" />
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+					<Button Content="Previous" />
+					<Button Content="Play/Pause" />
+					<Button Content="Next" />
+				</StackPanel>
+			</StackPanel>
+		</GroupBox>
 		<GroupBox Header="Episodes">
-			<ScrollViewer Width="1024" Height="512">
-				<ListBox Name="Episodes" Height="100" Width="100" ItemsSource="{Binding}" />
-			</ScrollViewer>
+			<DataGrid Name="Episodes" Width="1024" Height="512" ItemsSource="{Binding Source=episodes}" AutoGenerateColumns="False">
+
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="#" Binding="{Binding Number}" />
+					<DataGridTextColumn Header="Published" Binding="{Binding Date}" />
+					<DataGridTextColumn Header="Title" Binding="{Binding Title}" />
+					<DataGridTemplateColumn  Header="Play" CanUserResize="False">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<Button Click="Button_Click" Padding="0" Margin="0" Width="32">
+									<StackPanel>
+										<Label Content="Play" />
+										<Label Content="{Binding Link}" Visibility="Collapsed" />
+									</StackPanel>
+								</Button>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					<DataGridTemplateColumn  Header="Progress" Width="128" CanUserResize="False">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<ProgressBar Value="{Binding Path=Progress, Mode=OneWay}" Minimum="0" Maximum="100" Width="128" />
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					<DataGridCheckBoxColumn Header="Completed" Binding="{Binding Completed}" CanUserResize="False" />
+					<DataGridTextColumn Header="Description" Binding="{Binding Description}" Visibility="Collapsed" />
+				</DataGrid.Columns>
+
+			</DataGrid>
 		</GroupBox>
 	</StackPanel>
 </Window>
