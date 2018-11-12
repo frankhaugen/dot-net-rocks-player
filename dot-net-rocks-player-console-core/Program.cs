@@ -5,6 +5,9 @@ using System.Xml;
 using Newtonsoft.Json;
 using ConsoleTables;
 using NAudio;
+using NAudio.Wave;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace dot_net_rocks_player_console_core
 {
@@ -14,6 +17,8 @@ namespace dot_net_rocks_player_console_core
 		private static readonly string feedURL = "http://www.pwop.com/feed.aspx?show=dotnetrocks&filetype=master";
 		private static readonly string feedFileJSON = "dotnetrocks.json";
 		private static readonly string feedFileXML = "dotnetrocks.xml";
+
+		private static List<string> mp3Links = new List<string>();
 
 		static void Main(string[] args)
 		{
@@ -29,6 +34,26 @@ namespace dot_net_rocks_player_console_core
 
 
 			Console.WriteLine("Finished");
+			Console.WriteLine("Playing MP3...");
+
+			if (File.Exists("tmp.mp3"))
+			{
+				File.Delete("tmp.mp3");
+			}
+
+			Random random = new Random();
+			using (var mf = new MediaFoundationReader(mp3Links[random.Next(0, mp3Links.Count)]))
+			using (var wo = new WaveOutEvent())
+			{
+				wo.Init(mf);
+				wo.Play();
+				while (wo.PlaybackState == PlaybackState.Playing)
+				{
+					Thread.Sleep(1000);
+				}
+			}
+
+
 			Console.ReadLine();
 		}
 
@@ -45,6 +70,7 @@ namespace dot_net_rocks_player_console_core
 
 				foreach (var item in result.Rss.Channel.Item)
 				{
+					mp3Links.Add(item.Enclosure.Url);
 					table.AddRow(item.Link.Split('=')[1], item.Title, DateTime.ParseExact(item.PubDate, "ddd, dd MMM yyyy HH:mm:ss EDT", null).ToString("yyyy-MM-dd"));
 				}
 
