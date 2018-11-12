@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using System.Xml;
 using Newtonsoft.Json;
+using ConsoleTables;
+using NAudio;
 
 namespace dot_net_rocks_player_console_core
 {
@@ -10,26 +12,59 @@ namespace dot_net_rocks_player_console_core
 	{
 
 		private static readonly string feedURL = "http://www.pwop.com/feed.aspx?show=dotnetrocks&filetype=master";
-		private static readonly string feedFile = "dotnetrocks.json";
+		private static readonly string feedFileJSON = "dotnetrocks.json";
+		private static readonly string feedFileXML = "dotnetrocks.xml";
 
 		static void Main(string[] args)
 		{
+		
+			Console.SetBufferSize(16384, 16384);
+
 			Console.WriteLine("Starting...");
 
-			WriteFeedFile();
-			Console.WriteLine("Finished");
+			CollectFeed();
 
+
+			DisplayResult();
+
+
+			Console.WriteLine("Finished");
 			Console.ReadLine();
 		}
 
-		private static void WriteFeedFile()
+		private static void DisplayResult()
 		{
-			if (File.Exists(feedFile))
+			Console.WriteLine("Displaying result...");
+
+			if (File.Exists(feedFileJSON))
 			{
-				File.Delete(feedFile);
+			Console.WriteLine("Reading JSON from file...");
+				RootObject result = JsonConvert.DeserializeObject<RootObject>(File.ReadAllText(feedFileJSON));
+
+				var table = new ConsoleTable("Episode #", "Title", "Date");
+
+				foreach (var item in result.Rss.Channel.Item)
+				{
+					table.AddRow(item.Link.Split('=')[1], item.Title, DateTime.ParseExact(item.PubDate, "ddd, dd MMM yyyy HH:mm:ss EDT", null).ToString("yyyy-MM-dd"));
+				}
+
+				table.Write();
+				
+			}
+			else
+			{
+				Console.WriteLine(feedFileJSON + " does not exist...");
+			}
+		}
+
+		private static void WriteFile(string filepath, string data)
+		{
+			if (File.Exists(filepath))
+			{
+				File.Delete(filepath);
 			}
 
-			File.WriteAllText(feedFile, JSON());
+			File.WriteAllText(filepath, data);
 		}
 
 		private static string XML()
@@ -51,15 +86,20 @@ namespace dot_net_rocks_player_console_core
 			Console.WriteLine("Converting to JSON...");
 
 			XmlDocument xmlDocument = new XmlDocument();
-			xmlDocument.LoadXml(XML());
+
+			string xml = File.ReadAllText(feedFileXML);
+			
+			xmlDocument.LoadXml(xml);
+			
 
 			Console.WriteLine("Conversion finished...");
 			return JsonConvert.SerializeXmlNode(xmlDocument, Newtonsoft.Json.Formatting.Indented);
 		}
 
-		private static void CheckFileExist3()
+		private static void CollectFeed()
 		{
-			
+			WriteFile(feedFileXML, XML());
+			WriteFile(feedFileJSON, JSON());
 		}
 	}
 }
