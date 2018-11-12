@@ -9,7 +9,7 @@
 	<StackPanel>
 		<GroupBox Header="Episodes">
 			<ScrollViewer Width="1024" Height="512">
-				
+				<ListBox Name="Episodes" Height="100" Width="100" ItemsSource="{Binding}" />
 			</ScrollViewer>
 		</GroupBox>
 	</StackPanel>
